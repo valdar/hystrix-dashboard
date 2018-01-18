@@ -87,20 +87,20 @@
 				if(s != undefined) {
 					origin = s.stream;
 
-					if(s.delay) {
+					if(s.delay && origin.indexOf("?") !== -1) {
 						origin = origin + "&delay=" + s.delay;
-					}
-
-					//do not show authorization in stream title
-					if(s.auth) {
-						origin = origin + "&authorization=" + s.auth;
+					} else if(s.delay) {
+                        origin = origin + "?delay=" + s.delay;
 					}
 				}
 
-				var proxyStream = "../proxy.stream?origin=" + origin;
-
 				// start the EventSource which will open a streaming connection to the server
-				var source = new EventSource(proxyStream);
+				var source;
+                if(s.auth) {
+                    source = new EventSource(origin, {Authorization: s.auth});
+                } else {
+                    source = new EventSource(origin);
+				}
 
 				// add the listener that will process incoming events
 				source.addEventListener('message', hystrixMonitor.eventSourceMessageListener, false);
